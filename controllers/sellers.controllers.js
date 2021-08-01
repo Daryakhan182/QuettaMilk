@@ -1,24 +1,23 @@
-const buyersController = {};
-const Buyers = require('../models/buyers.model');
+const sellersController = {};
+const Sellers = require('../models/sellers.model');
 const path = require('path');
 //const jsonwebtoken =  require('jsonwebtoken');
 
-buyersController.addBuyer = async (req, res) => {
+sellersController.addSeller = async (req, res) => {
     try {
       const body = req.body;
-      const buyer = new Buyers(body);
-
-      const result = await buyer.save();
+      const seller = new Sellers(body);
+      const result = await seller.save();
   
       res.send({
-        message: 'Buyer added successfully'
+        message: 'Seller added successfully'
       });
     } catch (ex) {
       console.log('ex', ex);
       if(ex.code===11000){
         res
         .send({
-          message: 'This buyer has already been registered',
+          message: 'This Seller has already been registered',
         })
         .status(500);
       }
@@ -32,4 +31,4 @@ buyersController.addBuyer = async (req, res) => {
     }
   }
   };
-  module.exports = buyersController;
+  module.exports = sellersController;

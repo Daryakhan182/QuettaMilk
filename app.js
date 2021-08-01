@@ -4,7 +4,6 @@ const http = require('http');
 const server = http.createServer(app);
 const path= require('path');
 
-require('dotenv').config();
 const errorHandler = require("./middleware/error-handler");
 const errorMessage = require("./middleware/error-message");
 const accessControls = require("./middleware/access-controls");
@@ -25,10 +24,20 @@ app.use(
 const UsersRoutes = require('./routes/users.routes');
 const AdminsRoutes = require('./routes/admins.routes');
 const BuyersRoutes = require('./routes/buyers.routes');
+const SellersRoutes = require('./routes/sellers.routes');
+const StocksRoutes = require('./routes/stocks.routes');
+const ExpensesRoutes = require('./routes/expenses.routes');
+const WaistageRoutes = require('./routes/waistage.routes');
+
+
+
+
 
 
 // connection to mongoose
+require('dotenv').config();
 const mongoCon = process.env.mongoCon;
+// console.log("MongoDB",mongoCon)
 
 mongoose.connect(mongoCon,{ useNewUrlParser: true,useCreateIndex: true, useUnifiedTopology: true });
 
@@ -53,6 +62,12 @@ app.use(cors());
 app.use("/users",UsersRoutes);
 app.use("/admins",AdminsRoutes);
 app.use("/buyers",BuyersRoutes);
+app.use("/sellers",SellersRoutes);
+app.use("/stocks",StocksRoutes);
+app.use("/expenses",ExpensesRoutes);
+app.use("/waistages",WaistageRoutes);
+
+
 
 
 app.use(errorHandler);
