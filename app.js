@@ -31,13 +31,11 @@ const WaistageRoutes = require('./routes/waistage.routes');
 const SalesRoutes = require('./routes/sales.routes');
 const PurchasesRoutes = require('./routes/purchases.routes');
 const ManagersRoutes = require('./routes/managers.routes');
-
-
-
-
-
-
-
+const buyersRevisionRoutes = require('./routes/buyers-revision.routes');
+const expRevisionRoutes = require('./routes/expenses-revision.routes');
+const mngRevisionRoutes = require('./routes/managers-revision.routes');
+const purchaseRevisionRoutes = require('./routes/purchase-revision.routes');
+const itemsRoutes = require('./routes/items.routes');
 
 
 // connection to mongoose
@@ -75,7 +73,11 @@ app.use("/waistages",WaistageRoutes);
 app.use("/sales",SalesRoutes);
 app.use("/purchases",PurchasesRoutes);
 app.use("/managers",ManagersRoutes);
-
+app.use("/buyersRevision",buyersRevisionRoutes);
+app.use("/expensesRevision",expRevisionRoutes);
+app.use("/managersRevision",mngRevisionRoutes);
+app.use("/purchaseRevision",purchaseRevisionRoutes);
+app.use("/items",itemsRoutes);
 
 app.use(errorHandler);
 

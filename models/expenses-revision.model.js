@@ -1,34 +1,27 @@
 const mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
-const SchemaTypes = mongoose.Schema.Types;
 const mongoosePaginate = require('mongoose-paginate');
-const Schema = mongoose.Schema;
+const SchemaTypes = mongoose.Schema.Types;
 const moment = require('moment');  
-const Buyer = new Schema({
+
+const Schema = mongoose.Schema;
+
+const ExpenseRevision = new Schema({
     id: {
         type: Number,
         unique: true,
         sparse:true
     },
-     name: {
+     itemName: {
         type: String
     },
-    address: {
-        type: String
+    itemsQuantity: {
+        type: Number
     },
-    contact: {
-        type: [Number]
-    },
-    mUnitPrice: {
+    itemQuanExpenPrice:{
         type: SchemaTypes.Double
-    },
-    yUnitPrice: {
-        type: SchemaTypes.Double
-    },
-    buyerType: {
-        type: String
-    },
-    revision:{
+    },   
+     revision:{
         type: Number,
         default: 0
     },
@@ -37,7 +30,6 @@ const Buyer = new Schema({
         default: 0
     },
     timeStamp:{ 
-        // type : Date, default: moment().format('LLL')
         type : String, default: moment().format('LLL')
 
     },
@@ -51,11 +43,11 @@ const Buyer = new Schema({
 
 });
 
-Buyer.plugin(mongoosePaginate);
+ExpenseRevision.plugin(mongoosePaginate);
 
-Buyer.methods.toJSON = function() {
+ExpenseRevision.methods.toJSON = function() {
     var obj = this.toObject();
     delete obj.password;
     return obj;
    }
-module.exports = mongoose.model("Buyer", Buyer);
+module.exports = mongoose.model("ExpenseRevision", ExpenseRevision);

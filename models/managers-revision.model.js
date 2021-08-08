@@ -5,7 +5,7 @@ const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
 const moment = require('moment');  
 
-const Manager = new Schema({
+const ManagersRevision = new Schema({
     id: {
         type: Number,
         unique: true,
@@ -48,11 +48,11 @@ const Manager = new Schema({
 
 });
 
-Manager.plugin(mongoosePaginate);
+ManagersRevision.plugin(mongoosePaginate);
 
-Manager.methods.toJSON = function() {
+ManagersRevision.methods.toJSON = function() {
     var obj = this.toObject();
     delete obj.password;
     return obj;
    }
-module.exports = mongoose.model("Manager", Manager);
+module.exports = mongoose.model("ManagerRevision", ManagersRevision);

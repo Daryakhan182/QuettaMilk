@@ -3,9 +3,7 @@ require('mongoose-double')(mongoose);
 const SchemaTypes = mongoose.Schema.Types;
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
-const moment = require('moment');  
-
-const Manager = new Schema({
+const Item = new Schema({
     id: {
         type: Number,
         unique: true,
@@ -14,18 +12,12 @@ const Manager = new Schema({
      name: {
         type: String
     },
-    address: {
+    countType: {
         type: String
     },
-    contact: {
-        type: [Number]
-    },
-    password: {
-        type: String
-    },
-    role: {
-        type: String
-    },  
+    itemPrice: {
+        type: SchemaTypes.Double
+    }, 
     revision:{
        type: Number,
        default: 0
@@ -35,7 +27,7 @@ const Manager = new Schema({
        default: 0
    },
    timeStamp:{ 
-       type : String, default: moment().format('LLL')
+       type : String,
 
    },
    groupId:{
@@ -48,11 +40,11 @@ const Manager = new Schema({
 
 });
 
-Manager.plugin(mongoosePaginate);
+Item.plugin(mongoosePaginate);
 
-Manager.methods.toJSON = function() {
+Item.methods.toJSON = function() {
     var obj = this.toObject();
     delete obj.password;
     return obj;
    }
-module.exports = mongoose.model("Manager", Manager);
+module.exports = mongoose.model("Item", Item);

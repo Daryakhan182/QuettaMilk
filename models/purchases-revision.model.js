@@ -5,13 +5,13 @@ const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
 const moment = require('moment');  
 
-const Manager = new Schema({
+const PurchaseRevision = new Schema({
     id: {
         type: Number,
         unique: true,
         sparse:true
     },
-     name: {
+     venderName: {
         type: String
     },
     address: {
@@ -20,12 +20,21 @@ const Manager = new Schema({
     contact: {
         type: [Number]
     },
-    password: {
+    itemName: {
         type: String
     },
-    role: {
+    itemQuantity: {
+        type: Number
+    },
+    itemPrice: {
+        type: SchemaTypes.Double
+    },
+    totalPrice: {
+        type: SchemaTypes.Double
+    },
+    buyerType: {
         type: String
-    },  
+    }, 
     revision:{
        type: Number,
        default: 0
@@ -48,11 +57,11 @@ const Manager = new Schema({
 
 });
 
-Manager.plugin(mongoosePaginate);
+PurchaseRevision.plugin(mongoosePaginate);
 
-Manager.methods.toJSON = function() {
+PurchaseRevision.methods.toJSON = function() {
     var obj = this.toObject();
     delete obj.password;
     return obj;
    }
-module.exports = mongoose.model("Manager", Manager);
+module.exports = mongoose.model("PurchaseRevision", PurchaseRevision);

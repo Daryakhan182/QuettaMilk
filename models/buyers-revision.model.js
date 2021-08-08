@@ -4,7 +4,7 @@ const SchemaTypes = mongoose.Schema.Types;
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
 const moment = require('moment');  
-const Buyer = new Schema({
+const BuyersRevision = new Schema({
     id: {
         type: Number,
         unique: true,
@@ -37,7 +37,6 @@ const Buyer = new Schema({
         default: 0
     },
     timeStamp:{ 
-        // type : Date, default: moment().format('LLL')
         type : String, default: moment().format('LLL')
 
     },
@@ -51,11 +50,11 @@ const Buyer = new Schema({
 
 });
 
-Buyer.plugin(mongoosePaginate);
+BuyersRevision.plugin(mongoosePaginate);
 
-Buyer.methods.toJSON = function() {
+BuyersRevision.methods.toJSON = function() {
     var obj = this.toObject();
     delete obj.password;
     return obj;
    }
-module.exports = mongoose.model("Buyer", Buyer);
+module.exports = mongoose.model("BuyersRevision", BuyersRevision);

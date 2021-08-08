@@ -3,6 +3,7 @@ require('mongoose-double')(mongoose);
 const SchemaTypes = mongoose.Schema.Types;
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
+const moment = require('moment');  
 
 const Purchase = new Schema({
     id: {
@@ -33,7 +34,27 @@ const Purchase = new Schema({
     },
     buyerType: {
         type: String
-    }
+    }, 
+    revision:{
+       type: Number,
+       default: 0
+   },
+   status: {
+       type: Number,
+       default: 0
+   },
+   timeStamp:{ 
+       type : String, default: moment().format('LLL')
+
+   },
+   groupId:{
+       type: Number,
+       default: 0
+   }
+}, {
+
+   versionKey: false // _v:0 is removed from document
+
 });
 
 Purchase.plugin(mongoosePaginate);
