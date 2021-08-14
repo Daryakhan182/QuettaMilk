@@ -9,13 +9,13 @@ const Item = new Schema({
         unique: true,
         sparse:true
     },
-     name: {
+     Itemname: {
         type: String
     },
-    countType: {
+    countingUnit: {
         type: String
     },
-    itemPrice: {
+    price: {
         type: SchemaTypes.Double
     }, 
     revision:{

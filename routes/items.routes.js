@@ -10,8 +10,8 @@ router.get("/all",itemsController.getAll);
 //router.post("/register",UserController.registerUser);
 //router.get("/:_id",UserController.getSingleUser);
 router.post("/add",itemsController.addItem);
-//router.put("/:_id", UserController.updateUser);
-//router.delete("/:_id", UserController.deleteUser);
+router.put("/:_id", itemsController.updateItem);
+router.delete("/:_id", itemsController.deleteItem);
 
 
 module.exports = router;
