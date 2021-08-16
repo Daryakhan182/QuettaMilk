@@ -43,7 +43,7 @@ require('dotenv').config();
 const mongoCon = process.env.mongoCon;
 // console.log("MongoDB",mongoCon)
 
-mongoose.connect(mongoCon,{ useNewUrlParser: true,useCreateIndex: true, useUnifiedTopology: true });
+mongoose.connect(mongoCon,{ useNewUrlParser: true,useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false });
 
 
 const fs = require('fs');

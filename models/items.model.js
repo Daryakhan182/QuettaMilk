@@ -33,6 +33,10 @@ const Item = new Schema({
    groupId:{
        type: Number,
        default: 0
+   },
+   userId:{
+    type: Number,
+    default: 0
    }
 }, {
 

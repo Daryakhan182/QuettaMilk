@@ -7,9 +7,9 @@ itemsController.addItem = async (req, res) => {
       const item = new Items(body);
       item.timeStamp = moment().format('LLL');
       const result = await item.save();
-  
       res.send({
-        message: 'item added successfully'
+        message: 'item added successfully',
+        data: result
       });
     } catch (ex) {
       console.log('ex', ex);
@@ -79,15 +79,16 @@ async function runUpdate(_id, updates, res) {
       },
       {
         upsert: true,
-        runValidators: true
+        runValidators: true,
       }
     );
-
     {
       if (result.nModified == 1) {
+        const updated = await Items.findOne({ _id: _id });
         res.status(200).send({
           code: 200,
-          message: 'Updated Successfully'
+          message: 'Updated Successfully',
+          data: updated
         });
       } else if (result.upserted) {
         res.status(200).send({
@@ -110,12 +111,58 @@ async function runUpdate(_id, updates, res) {
   itemsController.getAll = async (req, res) => {
     console.log('body',req.body);
     let obj = req.body;
-    if(obj.name || obj.countType || obj.itemPrice)
+    if(obj.Itemname || obj.countingUnit || obj.price)
     {
       let searhItem;
       try {
-        const name = obj.name;
-        searhItem = await Items.find({ name: name });
+        const name = obj.Itemname;
+        const count = obj.countingUnit;
+        const price = obj.price;
+        let query;
+        //making query for mongodb to excute.
+        if(name && count && price)
+        {
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price });
+          console.log('query:',searhItem);
+
+        }
+        else if (name && count)
+        {
+          searhItem = await Items.find({ Itemname: name, countingUnit:count});
+          console.log('query:',searhItem);
+        }
+        else if (name && price)
+        {
+          searhItem = await Items.find({ Itemname: name, price:price });
+          console.log('query:',searhItem);
+        }
+        else if (price && count)
+        {
+          searhItem = await Items.find({ countingUnit:count, price:price });
+          console.log('query:',searhItem);
+        }
+        else if (name)
+        {
+          searhItem = await Items.find({ Itemname: name});
+          console.log('query:',searhItem);
+        }
+        else if (price)
+        {
+          searhItem = await Items.find({ price: NumberLong(price) });
+          console.log('query:',searhItem);
+        }
+        else if (count)
+        {
+          searhItem = await Items.find({ countingUnit:count});
+          console.log('query:',searhItem);
+        }
+        else 
+        {
+        res.status(200).send({
+          code: 200,
+          message: 'Unexpected Object body'
+          });
+        }
         res.status(200).send({
           code: 200,
           message: 'Successful',
