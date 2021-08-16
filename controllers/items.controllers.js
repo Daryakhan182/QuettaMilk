@@ -148,7 +148,10 @@ async function runUpdate(_id, updates, res) {
         }
         else if (price)
         {
-          searhItem = await Items.find({ price: NumberLong(price) });
+          searhItem = await Items.find({ price : { $type : 1} } );
+          // db.addressBook.find( { price : { $type : 1 } } )
+
+
           console.log('query:',searhItem);
         }
         else if (count)
@@ -187,10 +190,11 @@ async function runUpdate(_id, updates, res) {
             limit: parseInt(length)
           }
         );
+        console.log('items:',items.docs);
         res.status(200).send({
           code: 200,
           message: 'Successful',
-          data: items
+          data: items.docs
     
         });
       } catch (error) {
