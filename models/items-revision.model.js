@@ -35,9 +35,9 @@ const Item = new Schema({
        default: ""
    },
    userId:{
-       type : String,
-       default: ""
-   }
+     type : String,
+     default: ""
+    }
 }, {
 
    versionKey: false // _v:0 is removed from document
@@ -51,4 +51,4 @@ Item.methods.toJSON = function() {
     delete obj.password;
     return obj;
    }
-module.exports = mongoose.model("Item", Item);
+module.exports = mongoose.model("Items-revision", Item);

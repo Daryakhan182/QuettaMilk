@@ -1,12 +1,34 @@
 const itemsController = {};
 const Items = require('../models/items.model');
 const moment = require('moment');  
+const http = require('http');
+var querystring = require('querystring');
+const { resolve } = require('path');
+
+
 itemsController.addItem = async (req, res) => {
     try {
       const body = req.body;
       const item = new Items(body);
       item.timeStamp = moment().format('LLL');
       const result = await item.save();
+      if(result._id)
+      {
+        var id  = result._id.toString();
+        var revise =  {
+        revision : result.revision,
+        status : result.status,
+        groupId : id,
+        userId : result.userId,
+        Itemname : result.Itemname,
+        countingUnit : result.countingUnit,
+        price : result.price,
+        timeStamp : moment().format('LLL')
+      }
+        var value = await addRevision(revise).then((responce) =>{
+          return responce;
+        });
+      }
       res.send({
         message: 'item added successfully',
         data: result
@@ -43,6 +65,25 @@ itemsController.deleteItem = async (req, res) => {
     const result = await Items.findOneAndDelete({
       _id: _id
     });
+    if(result._id)
+    {
+      var id  = result._id.toString();
+      var status = 2;
+      var revision = result.revision + 1;
+      var revise =  {
+      revision : revision,
+      status : status,
+      groupId : id,
+      userId : result.userId,
+      Itemname : result.Itemname,
+      countingUnit : result.countingUnit,
+      price : result.price,
+      timeStamp : moment().format('LLL')
+    }
+      var value = await addRevision(revise).then((responce) =>{
+        return responce;
+      });
+    }
     res.status(200).send({
       code: 200,
       message: 'Deleted Successfully'
@@ -68,8 +109,106 @@ itemsController.updateItem = async (req, res) => {
   }
 };
 
+async function addRevision(revision){
+  var promise = new Promise(function(resolve, reject){
+  var postData = revision;
+  var postBody = querystring.stringify(postData);
+  var options = {
+      host: 'localhost',
+      port: 3000,
+      path: '/itemsRevisionRoutes/add',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': postBody.length
+    }
+  };
+  var body = [];
+  
+  var req =  http.request(options, function(res) {
+    res.on('data', function(data) {
+      body.push(data);
+    });
+    res.on("end", function () {
+     if(body){
+      body = JSON.parse(Buffer.concat(body).toString());
+      resolve(body)
+     }
+    });
+  });
+  req.write(postBody);
+  req.end();
+  
+  req.on('error', function(e) {
+    console.error(e);
+  });
+    });
+    return promise
+  }
+
+async function getRevision(revision){
+var promise = new Promise(function(resolve, reject){
+var postData = revision;
+var postBody = querystring.stringify(postData);
+var options = {
+    host: 'localhost',
+    port: 3000,
+    path: '/itemsRevisionRoutes/all',
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': postBody.length
+  }
+};
+var body = [];
+
+var req =  http.request(options, function(res) {
+  // console.log(res.statusCode);
+  res.on('data', function(data) {
+    body.push(data);
+  });
+  res.on("end", function () {
+   if(body){
+    body = JSON.parse(Buffer.concat(body).toString());
+    resolve(body)
+   }
+  });
+});
+req.write(postBody);
+req.end();
+
+req.on('error', function(e) {
+  console.error(e);
+});
+  });
+  return promise
+}
 async function runUpdate(_id, updates, res) {
   try {
+    //save history first
+    if(_id)
+    {        
+      const result = await Items.findOne({ _id: _id });
+      if(result._id)
+      {
+      var id  = result._id.toString();
+      var status = 1;
+      var revision = result.revision + 1;
+      var revise =  {
+      revision : revision,
+      status : status,
+      groupId : id,
+      userId : result.userId,
+      Itemname : result.Itemname,
+      countingUnit : result.countingUnit,
+      price : result.price,
+      timeStamp : moment().format('LLL')
+    }
+      var value = await addRevision(revise).then((responce) =>{
+        return responce;
+      });
+    }
+  }
     const result = await Items.updateOne(
       {
         _id: _id
@@ -109,7 +248,7 @@ async function runUpdate(_id, updates, res) {
 }
 
   itemsController.getAll = async (req, res) => {
-    console.log('body',req.body);
+    var result = [];
     let obj = req.body;
     if(obj.Itemname || obj.countingUnit || obj.price)
     {
@@ -166,10 +305,17 @@ async function runUpdate(_id, updates, res) {
           message: 'Unexpected Object body'
           });
         }
+        if(req.body.history == 'true')
+        {
+          result = await getRevision(req.body).then((value)=>{
+          return value;
+          });
+        }
         res.status(200).send({
           code: 200,
           message: 'Successful',
-          data: searhItem
+          data: searhItem,
+          history:result.data || []
         });
       } catch (error) {
         console.log('error', error);
@@ -190,12 +336,17 @@ async function runUpdate(_id, updates, res) {
             limit: parseInt(length)
           }
         );
-        console.log('items:',items.docs);
+        if(req.body.history == 'true')
+        {
+          result = await getRevision(req.body).then((value)=>{
+          return value;
+          });
+        } 
         res.status(200).send({
           code: 200,
           message: 'Successful',
-          data: items.docs
-    
+          data: items.docs,
+          history:result.data || []
         });
       } catch (error) {
         console.log('error', error);

@@ -36,6 +36,8 @@ const expRevisionRoutes = require('./routes/expenses-revision.routes');
 const mngRevisionRoutes = require('./routes/managers-revision.routes');
 const purchaseRevisionRoutes = require('./routes/purchase-revision.routes');
 const itemsRoutes = require('./routes/items.routes');
+const itemsRevisionRoutes = require('./routes/items-revision.routes');
+
 
 
 // connection to mongoose
@@ -78,6 +80,8 @@ app.use("/expensesRevision",expRevisionRoutes);
 app.use("/managersRevision",mngRevisionRoutes);
 app.use("/purchaseRevision",purchaseRevisionRoutes);
 app.use("/items",itemsRoutes);
+app.use("/itemsRevisionRoutes",itemsRevisionRoutes);
+
 
 app.use(errorHandler);
 
