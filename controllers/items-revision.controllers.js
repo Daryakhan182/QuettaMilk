@@ -66,11 +66,8 @@ itemsRevisionController.getAll = async (req, res) => {
         }
         else if (price)
         {
-          searhItem = await Items.find({ price : { $type : 1} } );
+          searhItem = await Items.find({ price:price } );
           // db.addressBook.find( { price : { $type : 1 } } )
-
-
-          console.log('query:',searhItem);
         }
         else if (count)
         {

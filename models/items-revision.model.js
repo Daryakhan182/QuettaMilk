@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
-const SchemaTypes = mongoose.Schema.Types;
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
 const Item = new Schema({
@@ -16,7 +15,8 @@ const Item = new Schema({
         type: String
     },
     price: {
-        type: SchemaTypes.Double
+        type: Number,
+        default: 0    
     }, 
     revision:{
        type: Number,

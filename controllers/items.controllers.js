@@ -12,23 +12,23 @@ itemsController.addItem = async (req, res) => {
       const item = new Items(body);
       item.timeStamp = moment().format('LLL');
       const result = await item.save();
-      if(result._id)
-      {
-        var id  = result._id.toString();
-        var revise =  {
-        revision : result.revision,
-        status : result.status,
-        groupId : id,
-        userId : result.userId,
-        Itemname : result.Itemname,
-        countingUnit : result.countingUnit,
-        price : result.price,
-        timeStamp : moment().format('LLL')
-      }
-        var value = await addRevision(revise).then((responce) =>{
-          return responce;
-        });
-      }
+      // if(result._id)
+      // {
+      //   var id  = result._id.toString();
+      //   var revise =  {
+      //   revision : result.revision,
+      //   status : result.status,
+      //   groupId : id,
+      //   userId : result.userId,
+      //   Itemname : result.Itemname,
+      //   countingUnit : result.countingUnit,
+      //   price : result.price,
+      //   timeStamp : moment().format('LLL')
+      // }
+      //   var value = await addRevision(revise).then((responce) =>{
+      //     return responce;
+      //   });
+      // }
       res.send({
         message: 'item added successfully',
         data: result
@@ -287,11 +287,8 @@ async function runUpdate(_id, updates, res) {
         }
         else if (price)
         {
-          searhItem = await Items.find({ price : { $type : 1} } );
-          // db.addressBook.find( { price : { $type : 1 } } )
-
-
-          console.log('query:',searhItem);
+          searhItem = await Items.find({ price:price } );
+          // console.log('query price:',searhItem);
         }
         else if (count)
         {
@@ -311,11 +308,31 @@ async function runUpdate(_id, updates, res) {
           return value;
           });
         }
+        // res.status(200).send({
+        //   code: 200,
+        //   message: 'Successful',
+        //   data: searhItem,
+        //   history:result.data || []
+        // });
+        let combinedArray = [];
+          let latestData = [];
+          latestData = searhItem;
+          let historyData = [];
+          historyData = result.data || [];
+
+          combinedArray = [...latestData];
+          combinedArray.push(...historyData);
+          combinedArray.sort(function(a, b) {
+            var keyA = a._id;
+              keyB = b._id;
+            if (keyA < keyB) return -1;
+            if (keyA > keyB) return 1;
+            return 0;
+          });
         res.status(200).send({
           code: 200,
           message: 'Successful',
-          data: searhItem,
-          history:result.data || []
+          data: combinedArray
         });
       } catch (error) {
         console.log('error', error);
@@ -342,11 +359,31 @@ async function runUpdate(_id, updates, res) {
           return value;
           });
         } 
+        let combinedArray = [];
+          let latestData = [];
+          latestData = items.docs;
+          let historyData = [];
+          historyData = result.data || []
+
+          combinedArray = [...latestData];
+          combinedArray.push(...historyData);
+          combinedArray.sort(function(a, b) {
+            var keyA = a._id;
+              keyB = b._id;
+            if (keyA < keyB) return -1;
+            if (keyA > keyB) return 1;
+            return 0;
+          });
+        // res.status(200).send({
+        //   code: 200,
+        //   message: 'Successful',
+        //   data: items.docs,
+        //   history:result.data || []
+        // });
         res.status(200).send({
           code: 200,
           message: 'Successful',
-          data: items.docs,
-          history:result.data || []
+          data: combinedArray
         });
       } catch (error) {
         console.log('error', error);
