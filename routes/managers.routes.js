@@ -5,13 +5,13 @@ const ManagerController = require('../controllers/managers.controllers');
 //const checkAuth = require('../middleware/check-auth');
 
 // router.get("/",UserController.sampleUser);
-//router.get("/all",UserController.getAll);
+router.post("/all",ManagerController.getAll);
 //router.post("/login",UserController.loginUser);
 //router.post("/register",UserController.registerUser);
 //router.get("/:_id",UserController.getSingleUser);
 router.post("/add",ManagerController.addManager);
-//router.put("/:_id", UserController.updateUser);
-//router.delete("/:_id", UserController.deleteUser);
+router.put("/:_id", ManagerController.updateManager);
+router.delete("/:_id", ManagerController.deleteManager);
 
 
 module.exports = router;

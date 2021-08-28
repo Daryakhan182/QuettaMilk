@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
-const SchemaTypes = mongoose.Schema.Types;
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
-const moment = require('moment');  
 
 const Manager = new Schema({
     id: {
@@ -18,30 +16,31 @@ const Manager = new Schema({
         type: String
     },
     contact: {
-        type: [Number]
+        type: Number
     },
     password: {
-        type: String
+        type: String,
+        default: ""
     },
     role: {
         type: String
     },  
     revision:{
-       type: Number,
-       default: 0
-   },
-   status: {
-       type: Number,
-       default: 0
-   },
-   timeStamp:{ 
-       type : String, default: moment().format('LLL')
-
-   },
-   groupId:{
-       type: Number,
-       default: 0
-   }
+        type: Number,
+        default: 0
+    },
+    status: {
+        type: Number,
+        default: 0
+    },
+    timeStamp:{ 
+        type : String,
+ 
+    },
+    groupId:{
+        type : String,
+        default: ""
+    },
 }, {
 
    versionKey: false // _v:0 is removed from document
