@@ -35,9 +35,9 @@ const Item = new Schema({
        default: ""
    },
    userId:{
-       type : String,
-       default: ""
-   }
+    type: Schema.Types.ObjectId, ref: "Manager"
+ }
+
 }, {
 
    versionKey: false // _v:0 is removed from document
@@ -48,7 +48,6 @@ Item.plugin(mongoosePaginate);
 
 Item.methods.toJSON = function() {
     var obj = this.toObject();
-    delete obj.password;
     return obj;
    }
 module.exports = mongoose.model("Item", Item);

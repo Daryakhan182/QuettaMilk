@@ -16,16 +16,22 @@ const BuyersRevision = new Schema({
     address: {
         type: String
     },
-    contact: {
-        type: [Number]
+    mobileN: {
+        type: Number
     },
-    mUnitPrice: {
-        type: SchemaTypes.Double
+    phoneN: {
+        type: Number
     },
-    yUnitPrice: {
-        type: SchemaTypes.Double
+    otherN: {
+        type: Number
     },
-    buyerType: {
+    milkPrice: {
+        type: Number
+    },
+    yougurtPrice: {
+        type: Number
+    },
+    type: {
         type: String
     },
     revision:{
@@ -37,13 +43,16 @@ const BuyersRevision = new Schema({
         default: 0
     },
     timeStamp:{ 
-        type : String, default: moment().format('LLL')
-
+        type : String,
+ 
     },
     groupId:{
-        type: Number,
-        default: 0
-    }
+        type : String,
+        default: ""
+    },
+    userId:{
+        type: Schema.Types.ObjectId, ref: "Manager"
+     }
 }, {
 
     versionKey: false // _v:0 is removed from document

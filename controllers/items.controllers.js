@@ -11,24 +11,7 @@ itemsController.addItem = async (req, res) => {
       const body = req.body;
       const item = new Items(body);
       item.timeStamp = moment().format('LLL');
-      const result = await item.save();
-      // if(result._id)
-      // {
-      //   var id  = result._id.toString();
-      //   var revise =  {
-      //   revision : result.revision,
-      //   status : result.status,
-      //   groupId : id,
-      //   userId : result.userId,
-      //   Itemname : result.Itemname,
-      //   countingUnit : result.countingUnit,
-      //   price : result.price,
-      //   timeStamp : moment().format('LLL')
-      // }
-      //   var value = await addRevision(revise).then((responce) =>{
-      //     return responce;
-      //   });
-      // }
+      const result = await item.save().then(item => item.populate('userId').execPopulate())
       res.send({
         message: 'item added successfully',
         data: result
@@ -261,38 +244,38 @@ async function runUpdate(_id, updates, res) {
         //making query for mongodb to excute.
         if(name && count && price)
         {
-          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price });
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price }).populate('userId');
           console.log('query:',searhItem);
 
         }
         else if (name && count)
         {
-          searhItem = await Items.find({ Itemname: name, countingUnit:count});
+          searhItem = await Items.find({ Itemname: name, countingUnit:count}).populate('userId');
           console.log('query:',searhItem);
         }
         else if (name && price)
         {
-          searhItem = await Items.find({ Itemname: name, price:price });
+          searhItem = await Items.find({ Itemname: name, price:price }).populate('userId');
           console.log('query:',searhItem);
         }
         else if (price && count)
         {
-          searhItem = await Items.find({ countingUnit:count, price:price });
+          searhItem = await Items.find({ countingUnit:count, price:price }).populate('userId');
           console.log('query:',searhItem);
         }
         else if (name)
         {
-          searhItem = await Items.find({ Itemname: name});
+          searhItem = await Items.find({ Itemname: name}).populate('userId');
           console.log('query:',searhItem);
         }
         else if (price)
         {
-          searhItem = await Items.find({ price:price } );
+          searhItem = await Items.find({ price:price } ).populate('userId');
           // console.log('query price:',searhItem);
         }
         else if (count)
         {
-          searhItem = await Items.find({ countingUnit:count});
+          searhItem = await Items.find({ countingUnit:count}).populate('userId');
           console.log('query:',searhItem);
         }
         else 
@@ -342,17 +325,7 @@ async function runUpdate(_id, updates, res) {
     {
       let items;
       try {
-        let merged = {};
-        const start = 0;
-        const length = 100;
-    
-        items = await Items.paginate(
-          merged,
-          {
-            offset: parseInt(start),
-            limit: parseInt(length)
-          }
-        );
+        items = await Items.find({}).populate('userId');
         if(req.body.history == 'true')
         {
           result = await getRevision(req.body).then((value)=>{
@@ -361,7 +334,7 @@ async function runUpdate(_id, updates, res) {
         } 
         let combinedArray = [];
           let latestData = [];
-          latestData = items.docs;
+          latestData = items;
           let historyData = [];
           historyData = result.data || []
 

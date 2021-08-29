@@ -50,7 +50,6 @@ ManagersRevision.plugin(mongoosePaginate);
 
 ManagersRevision.methods.toJSON = function() {
     var obj = this.toObject();
-    delete obj.password;
     return obj;
    }
 module.exports = mongoose.model("ManagerRevision", ManagersRevision);

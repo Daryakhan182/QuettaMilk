@@ -41,37 +41,37 @@ itemsRevisionController.getAll = async (req, res) => {
         const price = obj.price;
         if(name && count && price)
         {
-          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price });
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price }).populate('userId');
           console.log('query:',searhItem);
 
         }
         else if (name && count)
         {
-          searhItem = await Items.find({ Itemname: name, countingUnit:count});
+          searhItem = await Items.find({ Itemname: name, countingUnit:count}).populate('userId');
         }
         else if (name && price)
         {
-          searhItem = await Items.find({ Itemname: name, price:price });
+          searhItem = await Items.find({ Itemname: name, price:price }).populate('userId');
           console.log('query:',searhItem);
         }
         else if (price && count)
         {
-          searhItem = await Items.find({ countingUnit:count, price:price });
+          searhItem = await Items.find({ countingUnit:count, price:price }).populate('userId');
           console.log('query:',searhItem);
         }
         else if (name)
         {
-          searhItem = await Items.find({ Itemname: name});
+          searhItem = await Items.find({ Itemname: name}).populate('userId');
           console.log('query:',searhItem);
         }
         else if (price)
         {
-          searhItem = await Items.find({ price:price } );
+          searhItem = await Items.find({ price:price } ).populate('userId');
           // db.addressBook.find( { price : { $type : 1 } } )
         }
         else if (count)
         {
-          searhItem = await Items.find({ countingUnit:count});
+          searhItem = await Items.find({ countingUnit:count}).populate('userId');
           console.log('query:',searhItem);
         }
         else 
@@ -94,22 +94,12 @@ itemsRevisionController.getAll = async (req, res) => {
     {
       let items;
       try {
-        let merged = {};
-        const start = 0;
-        const length = 100;
-    
-        items = await Items.paginate(
-          merged,
-          {
-            offset: parseInt(start),
-            limit: parseInt(length)
-          }
-        );
-        console.log('items:',items.docs);
+
+        items = await Items.find({}).populate('userId');
         res.status(200).send({
           code: 200,
           message: 'Successful',
-          data: items.docs
+          data: items
     
         });
       } catch (error) {
