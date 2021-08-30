@@ -38,7 +38,7 @@ const ManagersRevision = new Schema({
     },
     groupId:{
         type : String,
-        default: ""
+        default: null
     },
 }, {
 

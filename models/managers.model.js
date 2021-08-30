@@ -39,7 +39,7 @@ const Manager = new Schema({
     },
     groupId:{
         type : String,
-        default: ""
+        default: null
     },
 }, {
 

@@ -32,12 +32,12 @@ const Item = new Schema({
    },
    groupId:{
        type : String,
-       default: ""
-   },
+       default: null
+    },
    userId:{
-    type: Schema.Types.ObjectId, ref: "Manager"
- }
-
+    type: String, ref: "Manager",
+    default: null
+}
 }, {
 
    versionKey: false // _v:0 is removed from document
