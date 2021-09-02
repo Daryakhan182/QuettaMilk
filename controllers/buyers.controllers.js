@@ -71,7 +71,7 @@ buyersController.addBuyer = async (req, res) => {
               revision : revision,
               status : status,
               groupId : id,
-              // userId : result.userId,
+              userId : result.userId,
               name : result.name,
               mobileN : result.mobileN,
               address : result.address,
@@ -110,7 +110,7 @@ buyersController.addBuyer = async (req, res) => {
               revision : revision,
               status : status,
               groupId : id,
-              // userId : result.userId,
+              userId : result.userId,
               name : result.name,
               mobileN : result.mobileN,
               address : result.address,
@@ -141,9 +141,11 @@ buyersController.addBuyer = async (req, res) => {
   
       {
         if (result.nModified == 1) {
+          const updated = await Buyers.findOne({ _id: _id }).populate('userId');
           res.status(200).send({
             code: 200,
-            message: 'Updated Successfully'
+            message: 'Updated Successfully',
+            data: updated
           });
         } else if (result.upserted) {
           res.status(200).send({

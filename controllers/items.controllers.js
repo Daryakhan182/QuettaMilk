@@ -206,7 +206,7 @@ async function runUpdate(_id, updates, res) {
     );
     {
       if (result.nModified == 1) {
-        const updated = await Items.findOne({ _id: _id });
+        const updated = await Items.findOne({ _id: _id }).populate('userId');
         res.status(200).send({
           code: 200,
           message: 'Updated Successfully',
