@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
-const SchemaTypes = mongoose.Schema.Types;
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
-
 const Seller = new Schema({
     id: {
         type: Number,
@@ -16,25 +14,51 @@ const Seller = new Schema({
     address: {
         type: String
     },
-    contact: {
-        type: [Number]
+    mobileN: {
+        type: Number
     },
-    mUnitPrice: {
-        type: SchemaTypes.Double
+    phoneN: {
+        type: Number
     },
-    yUnitPrice: {
-        type: SchemaTypes.Double
+    otherN: {
+        type: Number
     },
-    buyerType: {
-        type: String
-    }
+    milkPrice: {
+        type: Number
+    },
+    yougurtPrice: {
+        type: Number
+    },
+    revision:{
+        type: Number,
+        default: 0
+    },
+    status: {
+        type: Number,
+        default: 0
+    },
+    timeStamp:{ 
+        type : String,
+ 
+    },
+    groupId:{
+        type : String,
+        default: null
+     },
+     userId:{
+         type: String, ref: "Manager",
+         default: null
+     }
+}, {
+
+    versionKey: false // _v:0 is removed from document
+
 });
 
 Seller.plugin(mongoosePaginate);
 
 Seller.methods.toJSON = function() {
     var obj = this.toObject();
-    delete obj.password;
     return obj;
    }
 module.exports = mongoose.model("Seller", Seller);

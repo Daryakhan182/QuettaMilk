@@ -1,10 +1,8 @@
 const mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
-const SchemaTypes = mongoose.Schema.Types;
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
-const moment = require('moment');  
-const BuyersRevision = new Schema({
+const SellersRevision = new Schema({
     id: {
         type: Number,
         unique: true,
@@ -31,9 +29,6 @@ const BuyersRevision = new Schema({
     yougurtPrice: {
         type: Number
     },
-    type: {
-        type: String
-    },
     revision:{
         type: Number,
         default: 0
@@ -53,17 +48,17 @@ const BuyersRevision = new Schema({
      userId:{
          type: String, ref: "Manager",
          default: null
-     }
+     },
 }, {
 
-    versionKey: false // _v:0 is removed from document
+    versionKey: false 
 
 });
 
-BuyersRevision.plugin(mongoosePaginate);
+SellersRevision.plugin(mongoosePaginate);
 
-BuyersRevision.methods.toJSON = function() {
+SellersRevision.methods.toJSON = function() {
     var obj = this.toObject();
     return obj;
    }
-module.exports = mongoose.model("BuyersRevision", BuyersRevision);
+module.exports = mongoose.model("SellersRevision", SellersRevision);
