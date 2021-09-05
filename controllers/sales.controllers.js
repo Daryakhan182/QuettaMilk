@@ -10,7 +10,10 @@ salesController.addSale = async (req, res) => {
     const body = req.body;
     const sale = new Sales(body);
     sale.timeStamp = moment().format('LLL');
-    const result = await sale.save().then(item => item.populate('userId').execPopulate());
+    const result = await sale.save().then(item => item.populate('userId')
+    .populate('buyer')
+    .populate('item')
+    .execPopulate());
     res.send({
       message: 'sale added successfully',
       data: result
@@ -70,13 +73,11 @@ salesController.deleteSale = async (req, res) => {
         status: status,
         groupId: id,
         userId: result.userId,
-        name: result.name,
-        mobileN: result.mobileN,
-        address: result.address,
-        phoneN: result.phoneN,
-        otherN: result.otherN,
-        milkPrice: result.milkPrice,
-        yougurtPrice: result.yougurtPrice,
+        buyer: result.buyer,
+        item: result.item,
+        quantity: result.quantity,
+        payment: result.payment,
+        unitPrice: result.unitPrice,
         timeStamp: moment().format('LLL')
       }
       var value = await addRevision(revise).then((responce) => {
@@ -106,18 +107,16 @@ async function runUpdate(_id, updates, res) {
           status: status,
           groupId: id,
           userId: result.userId,
-          name: result.name,
-          mobileN: result.mobileN,
-          address: result.address,
-          phoneN: result.phoneN,
-          otherN: result.otherN,
-          milkPrice: result.milkPrice,
-          yougurtPrice: result.yougurtPrice,
+          buyer: result.buyer,
+          item: result.item,
+          quantity: result.quantity,
+          payment: result.payment,
+          unitPrice: result.unitPrice,
           timeStamp: moment().format('LLL')
         }
-        // var value = await addRevision(revise).then((responce) => {
-        //   return responce;
-        // });
+        var value = await addRevision(revise).then((responce) => {
+          return responce;
+        });
       }
     }
     const result = await Sales.updateOne(
@@ -135,7 +134,9 @@ async function runUpdate(_id, updates, res) {
 
     {
       if (result.nModified == 1) {
-        const updated = await Sales.findOne({ _id: _id }).populate('userId');
+        const updated = await Sales.findOne({ _id: _id }).populate('userId')
+        .populate('buyer')
+        .populate('item');
         res.status(200).send({
           code: 200,
           message: 'Updated Successfully',
@@ -162,7 +163,8 @@ salesController.getAll = async (req, res) => {
   var result = [];
   let obj = req.body;
   let history = req.body.history;
-  if (obj.name || obj.address || obj.mobileN || obj.phoneN || obj.otherN || obj.milkPrice || obj.yougurtPrice) {
+  if(obj.buyer || obj.item || obj.quantity || obj.payment || obj.unitPrice)
+  {
     let searhItem;
     try {
       delete req.body.history;
@@ -170,15 +172,14 @@ salesController.getAll = async (req, res) => {
         .filter((k) => obj[k] != null && obj[k] != undefined && obj[k] != '')
         .reduce((a, k) => ({ ...a, [k]: obj[k] }), {});
 
-      searhItem = await Sales.find(queryObject).populate('userId');
-      console.log('searhItem:', searhItem)
-
-      // if (history == 'true') {
-      //   result = await getRevision(req.body).then((value) => {
-      //     return value;
-      //   });
-      // }
-      console.log('revidion:', result)
+      searhItem = await Sales.find(queryObject).populate('userId')
+      .populate('buyer')
+      .populate('item');
+      if (history == 'true') {
+        result = await getRevision(req.body).then((value) => {
+          return value;
+        });
+      }
       let combinedArray = [];
       let latestData = [];
       latestData = searhItem;
@@ -207,13 +208,15 @@ salesController.getAll = async (req, res) => {
   else {
     let items;
     try {
-      items = await Sales.find({}).populate('userId');
-      // if (history == 'true') {
-      //   delete req.body.history;
-      //   result = await getRevision(req.body).then((value) => {
-      //     return value;
-      //   });
-      // }
+      items = await Sales.find({}).populate('userId')
+      .populate('buyer')
+      .populate('item');
+      if (history == 'true') {
+        delete req.body.history;
+        result = await getRevision(req.body).then((value) => {
+          return value;
+        });
+      }
       let combinedArray = [];
       let latestData = [];
       latestData = items;

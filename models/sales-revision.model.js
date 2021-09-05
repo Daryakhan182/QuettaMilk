@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
-const Sale = new Schema({
+const SaleRevision = new Schema({
     id: {
         type: Number,
         unique: true,
@@ -52,10 +52,10 @@ const Sale = new Schema({
 
 });
 
-Sale.plugin(mongoosePaginate);
+SaleRevision.plugin(mongoosePaginate);
 
-Sale.methods.toJSON = function() {
+SaleRevision.methods.toJSON = function() {
     var obj = this.toObject();
     return obj;
    }
-module.exports = mongoose.model("Sale", Sale);
+module.exports = mongoose.model("SaleRevision", SaleRevision);

@@ -29,6 +29,7 @@ const StocksRoutes = require('./routes/stocks.routes');
 const ExpensesRoutes = require('./routes/expenses.routes');
 const WaistageRoutes = require('./routes/waistage.routes');
 const SalesRoutes = require('./routes/sales.routes');
+const SalesRevisionRoutes = require('./routes/sales-revision.routes');
 const PurchasesRoutes = require('./routes/purchases.routes');
 const ManagersRoutes = require('./routes/managers.routes');
 const buyersRevisionRoutes = require('./routes/buyers-revision.routes');
@@ -83,7 +84,7 @@ app.use("/managersRevision",mngRevisionRoutes);
 app.use("/purchaseRevision",purchaseRevisionRoutes);
 app.use("/items",itemsRoutes);
 app.use("/itemsRevisionRoutes",itemsRevisionRoutes);
-
+app.use("/salesRevision",SalesRevisionRoutes);
 
 app.use(errorHandler);
 
