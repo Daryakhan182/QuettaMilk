@@ -4,6 +4,38 @@ const moment = require('moment');
 var querystring = require('querystring');
 const http = require('http');
 
+managersController.loginManager = async (req, res) => {
+  try {
+      const body = req.body;
+
+      const name = body.name;
+
+      // lets check if email exists
+      const result = await Managers.findOne({ name: name });
+      if (!result) {
+          // this means result is null
+          res.status(401).send({
+              Error: 'This manager doesnot exists. Please Add first'
+          });
+      } else {
+          // email did exist
+          // so lets match password
+
+          if (body.password == result.password) {
+              // great, allow this user access
+
+              res.send({ message: 'Successfully Logged in' });
+          }
+
+          else {
+              res.status(401).send({ message: 'Wrong name or Password' });
+          }
+      }
+  } catch (ex) {
+      console.log('ex', ex);
+  }
+};
+
 managersController.addManager = async (req, res) => {
     try {
       const body = req.body;

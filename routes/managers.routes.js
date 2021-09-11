@@ -6,7 +6,7 @@ const ManagerController = require('../controllers/managers.controllers');
 
 // router.get("/",UserController.sampleUser);
 router.post("/all",ManagerController.getAll);
-//router.post("/login",UserController.loginUser);
+router.post("/login",ManagerController.loginManager);
 //router.post("/register",UserController.registerUser);
 //router.get("/:_id",UserController.getSingleUser);
 router.post("/add",ManagerController.addManager);
