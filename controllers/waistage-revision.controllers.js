@@ -31,7 +31,7 @@ waistageRevisionController.addWaistage = async (req, res) => {
 };
 waistageRevisionController.getAll = async (req, res) => {
   let obj = req.body;
-  if(obj.buyer || obj.item || obj.quantity)
+  if(obj.buyer || obj.item || obj.quantity || obj.reason)
   {
     let searhItem;
     try {

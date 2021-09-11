@@ -17,6 +17,9 @@ const Waistage = new Schema({
         type: String, ref: "Item",
         default: null
     },
+    reason: {
+        type: String
+    },
     quantity: {
         type: Number,
         default: 0

@@ -75,6 +75,7 @@ waistagesController.addWaistage = async (req, res) => {
           userId: result.userId,
           buyer: result.buyer,
           item: result.item,
+          reason: result.reason,
           quantity: result.quantity,
           timeStamp: moment().format('LLL')
         }
@@ -107,6 +108,7 @@ waistagesController.addWaistage = async (req, res) => {
             userId: result.userId,
             buyer: result.buyer,
             item: result.item,
+            reason: result.reason,
             quantity: result.quantity,
             timeStamp: moment().format('LLL')
           }
@@ -159,7 +161,7 @@ waistagesController.addWaistage = async (req, res) => {
     var result = [];
     let obj = req.body;
     let history = req.body.history;
-    if(obj.buyer || obj.item || obj.quantity)
+    if(obj.buyer || obj.item || obj.quantity || obj.reason)
     {
       let searhItem;
       try {
