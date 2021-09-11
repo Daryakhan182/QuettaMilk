@@ -37,6 +37,8 @@ const sellersRevisionRoutes = require('./routes/sellers-revision.routes');
 const expRevisionRoutes = require('./routes/expenses-revision.routes');
 const mngRevisionRoutes = require('./routes/managers-revision.routes');
 const purchaseRevisionRoutes = require('./routes/purchase-revision.routes');
+const waistageRevisionRoutes = require('./routes/waistage-revision.routes');
+
 const itemsRoutes = require('./routes/items.routes');
 const itemsRevisionRoutes = require('./routes/items-revision.routes');
 
@@ -85,6 +87,7 @@ app.use("/purchaseRevision",purchaseRevisionRoutes);
 app.use("/items",itemsRoutes);
 app.use("/itemsRevisionRoutes",itemsRevisionRoutes);
 app.use("/salesRevision",SalesRevisionRoutes);
+app.use("/waistageRevision",waistageRevisionRoutes);
 
 app.use(errorHandler);
 
@@ -94,3 +97,4 @@ server.listen(app.get('port'));
 console.log('listening on port',app.get('port'));
 
 module.exports = server;
+

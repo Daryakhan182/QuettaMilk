@@ -3,7 +3,7 @@ require('mongoose-double')(mongoose);
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
 
-const Waistage = new Schema({
+const WaistageRevision = new Schema({
     id: {
         type: Number,
         unique: true,
@@ -46,10 +46,10 @@ const Waistage = new Schema({
 
 });
 
-Waistage.plugin(mongoosePaginate);
+WaistageRevision.plugin(mongoosePaginate);
 
-Waistage.methods.toJSON = function() {
+WaistageRevision.methods.toJSON = function() {
     var obj = this.toObject();
     return obj;
    }
-module.exports = mongoose.model("Waistage", Waistage);
+module.exports = mongoose.model("WaistageRevision", WaistageRevision);
