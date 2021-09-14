@@ -27,6 +27,10 @@ const Sale = new Schema({
         type: Number,
         default: 0
     },
+    amount: {
+        type: Number,
+        default: 0
+    },
     revision:{
         type: Number,
         default: 0
