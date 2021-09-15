@@ -9,7 +9,7 @@ purchasesController.addPurchase = async (req, res) => {
   try {
     const body = req.body;
     const purchase = new Purchases(body);
-    purchase.timeStamp = moment().format('LLL');
+    purchase.timeStamp = moment().format('L'); 
     const result = await purchase.save().then(item => item.populate('userId')
     .populate('seller')
     .populate('item')
@@ -77,7 +77,7 @@ purchasesController.deletePurchase = async (req, res) => {
         item: result.item,
         quantity: result.quantity,
         payment: result.payment,
-        timeStamp: moment().format('LLL')
+        timeStamp: moment().format('L')
       }
       var value = await addRevision(revise).then((responce) => {
         return responce;
@@ -110,7 +110,7 @@ async function runUpdate(_id, updates, res) {
           item: result.item,
           quantity: result.quantity,
           payment: result.payment,
-          timeStamp: moment().format('LLL')
+          timeStamp: moment().format('L')
         }
         var value = await addRevision(revise).then((responce) => {
           return responce;
@@ -161,7 +161,7 @@ purchasesController.getAll = async (req, res) => {
   var result = [];
   let obj = req.body;
   let history = req.body.history;
-  if(obj.seller || obj.item || obj.quantity || obj.payment)
+  if(obj.seller || obj.item || obj.quantity || obj.payment || obj.timeStamp)
   {
     let searhItem;
     try {
@@ -169,7 +169,6 @@ purchasesController.getAll = async (req, res) => {
       let queryObject = Object.keys(obj)
         .filter((k) => obj[k] != null && obj[k] != undefined && obj[k] != '')
         .reduce((a, k) => ({ ...a, [k]: obj[k] }), {});
-
       searhItem = await Purchases.find(queryObject).populate('userId')
       .populate('seller')
       .populate('item');

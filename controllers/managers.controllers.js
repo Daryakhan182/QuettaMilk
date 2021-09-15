@@ -20,11 +20,14 @@ managersController.loginManager = async (req, res) => {
       } else {
           // email did exist
           // so lets match password
-
           if (body.password == result.password) {
               // great, allow this user access
 
-              res.send({ message: 'Successfully Logged in' });
+              res.send({ 
+                message: 'Successfully Logged in', 
+                id: result._id,
+                name:result.name
+              });
           }
 
           else {
@@ -40,7 +43,7 @@ managersController.addManager = async (req, res) => {
     try {
       const body = req.body;
       const manager = new Managers(body);
-      manager.timeStamp = moment().format('LLL');
+      manager.timeStamp = moment().format('L'); 
       const result = await manager.save();
   
       res.send({
@@ -94,7 +97,7 @@ managersController.addManager = async (req, res) => {
         address : result.address,
         password:result.password,
         role:result.role,
-        timeStamp : moment().format('LLL')
+        timeStamp : moment().format('L')
       }
         var value = await addRevision(revise).then((responce) =>{
           return responce;
@@ -181,7 +184,7 @@ managersController.addManager = async (req, res) => {
         address : result.address,
         password:result.password,
         role:result.role,
-        timeStamp : moment().format('LLL')
+        timeStamp : moment().format('L')
       }
         var value = await addRevision(revise).then((responce) =>{
           return responce;
