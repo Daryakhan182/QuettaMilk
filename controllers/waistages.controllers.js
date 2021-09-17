@@ -9,7 +9,7 @@ waistagesController.addWaistage = async (req, res) => {
   try {
     const body = req.body;
     const waistage = new Waistages(body);
-    waistage.timeStamp = moment().format('L');
+    waistage.timeStamp = moment().format('LLL');
     const result = await waistage.save().then(item => item.populate('userId')
     .populate('buyer')
     .populate('item')
@@ -77,7 +77,7 @@ waistagesController.addWaistage = async (req, res) => {
           item: result.item,
           reason: result.reason,
           quantity: result.quantity,
-          timeStamp: moment().format('L')
+          timeStamp: moment().format('LLL')
         }
         var value = await addRevision(revise).then((responce) => {
           return responce;
@@ -110,7 +110,7 @@ waistagesController.addWaistage = async (req, res) => {
             item: result.item,
             reason: result.reason,
             quantity: result.quantity,
-            timeStamp: moment().format('L')
+            timeStamp: moment().format('LLL')
           }
           var value = await addRevision(revise).then((responce) => {
             return responce;
@@ -161,7 +161,7 @@ waistagesController.addWaistage = async (req, res) => {
     var result = [];
     let obj = req.body;
     let history = req.body.history;
-    if(obj.buyer || obj.item || obj.quantity || obj.reason || obj.timeStamp)
+    if(obj.buyer || obj.item || obj.quantity || obj.reason)
     {
       let searhItem;
       try {
