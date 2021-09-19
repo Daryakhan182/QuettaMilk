@@ -11,22 +11,50 @@ const Expense = new Schema({
         unique: true,
         sparse:true
     },
-     itemName: {
-        type: String
+    item:{
+        type: String, ref: "Item",
+        default: null
     },
-    itemsQuantity: {
-        type: Number
+    quantity: {
+        type: Number,
+        default: 0
     },
-    itemQuanExpenPrice:{
-        type: SchemaTypes.Double
-    }
+    price: {
+        type: Number,
+        default: 0
+    },
+    details: {
+        type : String,
+    },
+    revision:{
+        type: Number,
+        default: 0
+    },
+    status: {
+        type: Number,
+        default: 0
+    },
+    timeStamp:{ 
+        type : String,
+    },
+    groupId:{
+        type : String,
+        default: null
+     },
+     userId:{
+         type: String, ref: "Manager",
+         default: null
+     }
+}, {
+
+    versionKey: false // _v:0 is removed from document
+
 });
 
 Expense.plugin(mongoosePaginate);
 
 Expense.methods.toJSON = function() {
     var obj = this.toObject();
-    delete obj.password;
     return obj;
    }
 module.exports = mongoose.model("Expense", Expense);

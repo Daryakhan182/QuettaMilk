@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
 const mongoosePaginate = require('mongoose-paginate');
 const SchemaTypes = mongoose.Schema.Types;
-const moment = require('moment');  
 
 const Schema = mongoose.Schema;
 
@@ -12,16 +11,22 @@ const ExpenseRevision = new Schema({
         unique: true,
         sparse:true
     },
-     itemName: {
-        type: String
+    item:{
+        type: String, ref: "Item",
+        default: null
     },
-    itemsQuantity: {
-        type: Number
+    quantity: {
+        type: Number,
+        default: 0
     },
-    itemQuanExpenPrice:{
-        type: SchemaTypes.Double
-    },   
-     revision:{
+    price: {
+        type: Number,
+        default: 0
+    },
+    details: {
+        type : String,
+    },
+    revision:{
         type: Number,
         default: 0
     },
@@ -30,13 +35,16 @@ const ExpenseRevision = new Schema({
         default: 0
     },
     timeStamp:{ 
-        type : String, default: moment().format('LLL')
-
+        type : String,
     },
     groupId:{
-        type: Number,
-        default: 0
-    }
+        type : String,
+        default: null
+     },
+     userId:{
+         type: String, ref: "Manager",
+         default: null
+     }
 }, {
 
     versionKey: false // _v:0 is removed from document
@@ -47,7 +55,6 @@ ExpenseRevision.plugin(mongoosePaginate);
 
 ExpenseRevision.methods.toJSON = function() {
     var obj = this.toObject();
-    delete obj.password;
     return obj;
    }
 module.exports = mongoose.model("ExpenseRevision", ExpenseRevision);
