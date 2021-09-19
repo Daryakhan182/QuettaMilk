@@ -19,7 +19,8 @@
     "moment": "^2.29.1",
     "mongoose": "^5.13.5",
     "mongoose-double": "0.0.1",
-    "mongoose-paginate": "^5.0.3"
+    "mongoose-paginate": "^5.0.3",
+    "nodemon": "^2.0.12"
   },
   "devDependencies": {
     "dotenv": "^6.2.0",
