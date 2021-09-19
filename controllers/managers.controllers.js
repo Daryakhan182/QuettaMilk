@@ -14,8 +14,8 @@ managersController.loginManager = async (req, res) => {
       const result = await Managers.findOne({ name: name });
       if (!result) {
           // this means result is null
-          res.status(401).send({
-              Error: 'This manager doesnot exists. Please Add first'
+          res.send({
+            message: 'This user doesnot exists. Please Add first'
           });
       } else {
           // email did exist
@@ -26,12 +26,13 @@ managersController.loginManager = async (req, res) => {
               res.send({ 
                 message: 'Successfully Logged in', 
                 id: result._id,
-                name:result.name
+                name:result.name,
+                role:result.role
               });
           }
 
           else {
-              res.status(401).send({ message: 'Wrong name or Password' });
+              res.send({ message: 'Wrong User Name or Password' });
           }
       }
   } catch (ex) {
