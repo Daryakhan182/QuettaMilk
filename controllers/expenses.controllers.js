@@ -8,10 +8,13 @@ expensesController.addExpense = async (req, res) => {
     try {
       const body = req.body;
       const expense = new Expenses(body);
-      const result = await expense.save();
-  
+      expense.timeStamp = moment().format('LLL');
+      const result = await expense.save().then(item => item.populate('userId')
+      .populate('item')
+      .execPopulate());
       res.send({
-        message: 'expense added successfully'
+        message: 'expense added successfully',
+        data: result
       });
     } catch (ex) {
       console.log('ex', ex);
