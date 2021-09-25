@@ -31,23 +31,49 @@ itemsRevisionController.addItem = async (req, res) => {
 };
 
 itemsRevisionController.getAll = async (req, res) => {
-    let obj = req.body;
-    if(obj.Itemname || obj.countingUnit || obj.price)
+   let obj = req.body;
+    if(obj.Itemname || obj.countingUnit || obj.price || obj.isExpense)
     {
       let searhItem;
       try {
         const name = obj.Itemname;
         const count = obj.countingUnit;
         const price = obj.price;
-        if(name && count && price)
+        const isExpense = obj.isExpense;
+        let query;
+        //making query for mongodb to excute.
+        if(name && count && price && isExpense)
         {
-          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price }).populate('userId');
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price, isExpense:isExpense}).populate('userId');
           console.log('query:',searhItem);
 
+        }
+        else if(name && count && price)
+        {
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price}).populate('userId');
+          console.log('query:',searhItem);
+
+        }
+        else if(name && count && isExpense)
+        {
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
+
+        }
+        else if(name && price && isExpense)
+        {
+          searhItem = await Items.find({ Itemname: name, price:price, isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
+        }
+        else if(count && price && isExpense)
+        {
+          searhItem = await Items.find({ countingUnit:count, price:price, isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
         }
         else if (name && count)
         {
           searhItem = await Items.find({ Itemname: name, countingUnit:count}).populate('userId');
+          console.log('query:',searhItem);
         }
         else if (name && price)
         {
@@ -59,15 +85,35 @@ itemsRevisionController.getAll = async (req, res) => {
           searhItem = await Items.find({ countingUnit:count, price:price }).populate('userId');
           console.log('query:',searhItem);
         }
+        else if (price && isExpense)
+        {
+          searhItem = await Items.find({ isExpense:isExpense, price:price }).populate('userId');
+          console.log('query:',searhItem);
+        }
+        else if (count && isExpense)
+        {
+          searhItem = await Items.find({ isExpense:isExpense, countingUnit:count,}).populate('userId');
+          console.log('query:',searhItem);
+        }
+        else if (name && isExpense)
+        {
+          searhItem = await Items.find({ Itemname: name, isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
+        }
         else if (name)
         {
           searhItem = await Items.find({ Itemname: name}).populate('userId');
           console.log('query:',searhItem);
         }
+        else if (isExpense)
+        {
+          searhItem = await Items.find({ isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
+        }
         else if (price)
         {
           searhItem = await Items.find({ price:price } ).populate('userId');
-          // db.addressBook.find( { price : { $type : 1 } } )
+          // console.log('query price:',searhItem);
         }
         else if (count)
         {

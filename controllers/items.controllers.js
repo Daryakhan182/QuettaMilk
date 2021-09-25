@@ -59,6 +59,7 @@ itemsController.deleteItem = async (req, res) => {
       groupId : id,
       userId : result.userId,
       Itemname : result.Itemname,
+      isExpense: result.isExpense,
       countingUnit : result.countingUnit,
       price : result.price,
       timeStamp : moment().format('LLL')
@@ -183,6 +184,7 @@ async function runUpdate(_id, updates, res) {
       groupId : id,
       userId : result.userId,
       Itemname : result.Itemname,
+      isExpense: result.isExpense,
       countingUnit : result.countingUnit,
       price : result.price,
       timeStamp : moment().format('LLL')
@@ -233,20 +235,43 @@ async function runUpdate(_id, updates, res) {
   itemsController.getAll = async (req, res) => {
     var result = [];
     let obj = req.body;
-    if(obj.Itemname || obj.countingUnit || obj.price)
+    if(obj.Itemname || obj.countingUnit || obj.price || obj.isExpense)
     {
       let searhItem;
       try {
         const name = obj.Itemname;
         const count = obj.countingUnit;
         const price = obj.price;
+        const isExpense = obj.isExpense;
         let query;
         //making query for mongodb to excute.
-        if(name && count && price)
+        if(name && count && price && isExpense)
         {
-          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price }).populate('userId');
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price, isExpense:isExpense}).populate('userId');
           console.log('query:',searhItem);
 
+        }
+        else if(name && count && price)
+        {
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, price:price}).populate('userId');
+          console.log('query:',searhItem);
+
+        }
+        else if(name && count && isExpense)
+        {
+          searhItem = await Items.find({ Itemname: name, countingUnit:count, isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
+
+        }
+        else if(name && price && isExpense)
+        {
+          searhItem = await Items.find({ Itemname: name, price:price, isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
+        }
+        else if(count && price && isExpense)
+        {
+          searhItem = await Items.find({ countingUnit:count, price:price, isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
         }
         else if (name && count)
         {
@@ -263,9 +288,29 @@ async function runUpdate(_id, updates, res) {
           searhItem = await Items.find({ countingUnit:count, price:price }).populate('userId');
           console.log('query:',searhItem);
         }
+        else if (price && isExpense)
+        {
+          searhItem = await Items.find({ isExpense:isExpense, price:price }).populate('userId');
+          console.log('query:',searhItem);
+        }
+        else if (count && isExpense)
+        {
+          searhItem = await Items.find({ isExpense:isExpense, countingUnit:count,}).populate('userId');
+          console.log('query:',searhItem);
+        }
+        else if (name && isExpense)
+        {
+          searhItem = await Items.find({ Itemname: name, isExpense:isExpense}).populate('userId');
+          console.log('query:',searhItem);
+        }
         else if (name)
         {
           searhItem = await Items.find({ Itemname: name}).populate('userId');
+          console.log('query:',searhItem);
+        }
+        else if (isExpense)
+        {
+          searhItem = await Items.find({ isExpense:isExpense}).populate('userId');
           console.log('query:',searhItem);
         }
         else if (price)

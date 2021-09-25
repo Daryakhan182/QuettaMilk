@@ -14,6 +14,9 @@ const Item = new Schema({
     countingUnit: {
         type: String
     },
+    isExpense: {
+        type: String
+    },
     price: {
         type: Number,
         default: 0    
