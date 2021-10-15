@@ -15,6 +15,10 @@ const Payment = new Schema({
     amount: {
         type: Number,
         default: 0
+    },    
+    unpaid: {
+        type: Number,
+        default: 0
     },
     revision:{
         type: Number,

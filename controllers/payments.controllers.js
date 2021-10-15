@@ -73,6 +73,7 @@ paymentsController.deletePayment = async (req, res) => {
         groupId: id,
         userId: result.userId,
         amount:result.amount,
+        unpaid:result.unpaid,
         buyer: result.buyer,
         timeStamp: moment().format('LLL')
       }
@@ -104,6 +105,7 @@ async function runUpdate(_id, updates, res) {
           groupId: id,
           userId: result.userId,
           buyer: result.buyer,
+          unpaid:result.unpaid,
           amount:result.amount,
           timeStamp: moment().format('LLL')
         }
@@ -155,7 +157,7 @@ paymentsController.getAll = async (req, res) => {
   var result = [];
   let obj = req.body;
   let history = req.body.history;
-  if(obj.buyer || obj.amount)
+  if(obj.buyer || obj.amount || obj.unpaid)
   {
     let searhItem;
     try {

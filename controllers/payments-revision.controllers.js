@@ -32,7 +32,7 @@ PaymentsRevisionController.addPayment = async (req, res) => {
 };
 PaymentsRevisionController.getAll = async (req, res) => {
   let obj = req.body;
-  if(obj.buyer || obj.amount)
+  if(obj.buyer || obj.amount || obj.unpaid)
   {
     let searhItem;
     try {
