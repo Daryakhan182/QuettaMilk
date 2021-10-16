@@ -6,5 +6,7 @@ const ReportController = require('../controllers/report.controllers');
 router.post("/itemReport",ReportController.getItemReport);
 router.post("/saleReport",ReportController.getISaleReport);
 router.post("/saleReportRange",ReportController.getISaleReportRange);
+router.post("/itemsReport",ReportController.getItemsReportRange);
+
 
 module.exports = router;

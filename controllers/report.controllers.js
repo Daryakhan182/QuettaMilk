@@ -231,6 +231,165 @@ ReportController.getISaleReport = async (req, res) => {
   });
 
 };
+ReportController.getItemsReportRange = async (req, res) => {
+  let itemReport;
+
+  if(req.body.menu == 'Date Range'){
+    let fromDate = req.body.start.split('T')[0];
+    let toDate = req.body.end.split('T')[0];
+    itemReport = await Items.aggregate([
+      { $match : { isExpense : "false" } },
+      { $project: {  id: { $toString: "$_id" }, dateObj: { $toDate: "$timeStamp" }, Itemname: 1, countingUnit : 1} },
+            {
+             $project:
+             {
+               _id : 0,
+               id: 1,
+               dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
+               Itemname: 1,
+               countingUnit: 1,
+             }
+           },
+          {
+            $match:
+            {
+              $and: [
+                { dateObj: { $gte: fromDate, $lte: toDate } }
+              ]
+            }
+          },
+         {
+             $lookup:{
+                 from: "purchases",    
+                 localField: "id",   
+                 foreignField: "item", 
+                 as: "purchases"         
+             }
+         },
+         {
+             $lookup:{
+                 from: "sales", 
+                 localField: "id", 
+                 foreignField: "item",
+                 as: "sales"
+             }
+         },
+        {
+             $lookup:{
+                 from: "waistages", 
+                 localField: "id", 
+                 foreignField: "item",
+                 as: "waistages"
+             }
+         },
+         {   
+             $project:{
+                 _id : 0,
+                 id: 1,
+                 Itemname : 1,
+                 countingUnit : 1,
+                 salesQuantity : { $sum: "$sales.quantity"},
+                 purchasesQuantity : { $sum: "$purchases.quantity"},
+                 waistageQuntity: { $sum: "$waistages.quantity"},
+             } 
+         },
+             {   
+             $project:{
+                 _id : 0,
+                 id: 1,
+                 Itemname : 1,
+                 countingUnit : 1,
+                 sales: "$salesQuantity",
+                 purchases: "$purchasesQuantity",
+                 waistages: "$waistageQuntity",
+                 remainings: {$subtract:[ "$purchasesQuantity", { $add: [ "$salesQuantity", "$waistageQuntity" ] }] }
+             } 
+         }
+     ]);
+     res.status(200).send({
+      code: 200,
+      message: 'Successful',
+      itemReport: itemReport,
+    });  }
+  else if (req.body.menu == 'Date')
+  {
+  let date = req.body.date;
+  itemReport = await Items.aggregate([
+    { $match : { isExpense : "false" } },
+    { $project: {  id: { $toString: "$_id" }, dateObj: { $toDate: "$timeStamp" }, Itemname: 1, countingUnit : 1} },
+          {
+           $project:
+           {
+             _id : 0,
+             id: 1,
+             dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
+             Itemname: 1,
+             countingUnit: 1,
+           }
+         },
+         {
+          $match:
+          {
+            $and: [
+              { dateObj: date },
+            ]
+          }
+        },
+       {
+           $lookup:{
+               from: "purchases",    
+               localField: "id",   
+               foreignField: "item", 
+               as: "purchases"         
+           }
+       },
+       {
+           $lookup:{
+               from: "sales", 
+               localField: "id", 
+               foreignField: "item",
+               as: "sales"
+           }
+       },
+      {
+           $lookup:{
+               from: "waistages", 
+               localField: "id", 
+               foreignField: "item",
+               as: "waistages"
+           }
+       },
+       {   
+           $project:{
+               _id : 0,
+               id: 1,
+               Itemname : 1,
+               countingUnit : 1,
+               salesQuantity : { $sum: "$sales.quantity"},
+               purchasesQuantity : { $sum: "$purchases.quantity"},
+               waistageQuntity: { $sum: "$waistages.quantity"},
+           } 
+       },
+           {   
+           $project:{
+               _id : 0,
+               id: 1,
+               Itemname : 1,
+               countingUnit : 1,
+               sales: "$salesQuantity",
+               purchases: "$purchasesQuantity",
+               waistages: "$waistageQuntity",
+               remainings: {$subtract:[ "$purchasesQuantity", { $add: [ "$salesQuantity", "$waistageQuntity" ] }] }
+           } 
+       }
+   ]);
+   res.status(200).send({
+    code: 200,
+    message: 'Successful',
+    itemReport: itemReport,
+  });
+}
+};
 ReportController.getISaleReportRange = async (req, res) => {
   console.log('in item report')
   let paid;
