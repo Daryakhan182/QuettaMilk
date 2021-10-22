@@ -5,7 +5,6 @@ const Items = require('../models/items.model');
 const Sales = require('../models/sales.model');
 const Payments = require('../models/payments.model');
 const Expenses = require('../models/expenses.model');
-
 const path = require('path');
 const moment = require('moment');
 var querystring = require('querystring');
@@ -233,162 +232,539 @@ ReportController.getISaleReport = async (req, res) => {
 };
 ReportController.getItemsReportRange = async (req, res) => {
   let itemReport;
-
-  if(req.body.menu == 'Date Range'){
+  let purchase;
+  let sales;
+  let waistages;
+  if (req.body.menu == 'Date Range') {
     let fromDate = req.body.start.split('T')[0];
     let toDate = req.body.end.split('T')[0];
-    itemReport = await Items.aggregate([
-      { $match : { isExpense : "false" } },
-      { $project: {  id: { $toString: "$_id" }, dateObj: { $toDate: "$timeStamp" }, Itemname: 1, countingUnit : 1} },
-            {
-             $project:
-             {
-               _id : 0,
-               id: 1,
-               dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-               Itemname: 1,
-               countingUnit: 1,
-             }
-           },
-          {
-            $match:
-            {
-              $and: [
-                { dateObj: { $gte: fromDate, $lte: toDate } }
-              ]
-            }
-          },
-         {
-             $lookup:{
-                 from: "purchases",    
-                 localField: "id",   
-                 foreignField: "item", 
-                 as: "purchases"         
-             }
-         },
-         {
-             $lookup:{
-                 from: "sales", 
-                 localField: "id", 
-                 foreignField: "item",
-                 as: "sales"
-             }
-         },
+    purchase = await Items.aggregate([
+      { $match: { isExpense: "false" } },
+      { $project: { id: { $toString: "$_id" }, Itemname: 1, countingUnit: 1 } },
+      {
+        $project:
         {
-             $lookup:{
-                 from: "waistages", 
-                 localField: "id", 
-                 foreignField: "item",
-                 as: "waistages"
-             }
-         },
-         {   
-             $project:{
-                 _id : 0,
-                 id: 1,
-                 Itemname : 1,
-                 countingUnit : 1,
-                 salesQuantity : { $sum: "$sales.quantity"},
-                 purchasesQuantity : { $sum: "$purchases.quantity"},
-                 waistageQuntity: { $sum: "$waistages.quantity"},
-             } 
-         },
-             {   
-             $project:{
-                 _id : 0,
-                 id: 1,
-                 Itemname : 1,
-                 countingUnit : 1,
-                 sales: "$salesQuantity",
-                 purchases: "$purchasesQuantity",
-                 waistages: "$waistageQuntity",
-                 remainings: {$subtract:[ "$purchasesQuantity", { $add: [ "$salesQuantity", "$waistageQuntity" ] }] }
-             } 
-         }
-     ]);
-     res.status(200).send({
+          _id: 0,
+          id: 1,
+          Itemname: 1,
+          countingUnit: 1,
+        }
+      },
+      // Join with user_info table
+      {
+        $lookup: {
+          from: "purchases",       // other table name
+          localField: "id",   // name of users table field
+          foreignField: "item", // name of userinfo table field
+          as: "purchases"         // alias for userinfo table
+        }
+      },
+      { $unwind: "$purchases" },
+
+      {
+        $project: {
+          _id: 0, id: 1, dateObj: { $toDate: "$purchases.timeStamp" },
+          purchaseQ: "$purchases.quantity", Itemname: 1, countingUnit: 1
+        }
+      },
+      //formate date and new documents
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
+          purchaseQ: "$purchaseQ", Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $match:
+        {
+          $and: [
+            { dateObj: { $gte: fromDate, $lte: toDate } },
+          ]
+        }
+      },
+      // sum of purchases quantity against given date for items
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: 1,
+          purchase: "$purchaseQ",
+          Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$id",
+          date: { "$first": "$dateObj" },
+          name: { "$first": "$Itemname" },
+          unit: { "$first": "$countingUnit" },
+          pStock: { $sum: '$purchase' }
+        }
+      }
+    ]);
+    //Sales for an item
+    sales = await Items.aggregate([
+      { $match: { isExpense: "false" } },
+      { $project: { id: { $toString: "$_id" }, Itemname: 1, countingUnit: 1 } },
+      {
+        $project:
+        {
+          _id: 0,
+          id: 1,
+          Itemname: 1,
+          countingUnit: 1,
+        }
+      },
+      // Join with user_info table
+      {
+        $lookup: {
+          from: "sales",       // other table name
+          localField: "id",   // name of users table field
+          foreignField: "item", // name of userinfo table field
+          as: "sales"         // alias for userinfo table
+        }
+      },
+      { $unwind: "$sales" },
+
+      {
+        $project: {
+          _id: 0, id: 1, dateObj: { $toDate: "$sales.timeStamp" },
+          salesQ: "$sales.quantity", Itemname: 1, countingUnit: 1
+        }
+      },
+      //formate date and new documents
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
+          salesQ: "$salesQ", Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $match:
+        {
+          $and: [
+            { dateObj: { $gte: fromDate, $lte: toDate } },
+          ]
+        }
+      },
+      // sum of sales quantity against given date for items
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: 1,
+          sales: "$salesQ",
+          Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$id",
+          date: { "$first": "$dateObj" },
+          name: { "$first": "$Itemname" },
+          unit: { "$first": "$countingUnit" },
+          sStock: { $sum: '$sales' }
+        }
+      }
+    ]);
+    waistages = await Items.aggregate([
+      { $match: { isExpense: "false" } },
+      { $project: { id: { $toString: "$_id" }, Itemname: 1, countingUnit: 1 } },
+      {
+        $project:
+        {
+          _id: 0,
+          id: 1,
+          Itemname: 1,
+          countingUnit: 1,
+        }
+      },
+      // Join with user_info table
+      {
+        $lookup: {
+          from: "waistages",       // other table name
+          localField: "id",   // name of users table field
+          foreignField: "item", // name of userinfo table field
+          as: "waistages"         // alias for userinfo table
+        }
+      },
+      { $unwind: "$waistages" },
+
+      {
+        $project: {
+          _id: 0, id: 1, dateObj: { $toDate: "$waistages.timeStamp" },
+          waistagesQ: "$waistages.quantity", Itemname: 1, countingUnit: 1
+        }
+      },
+      //formate date and new documents
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
+          waistagesQ: "$waistagesQ", Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $match:
+        {
+          $and: [
+            { dateObj: { $gte: fromDate, $lte: toDate } },
+          ]
+        }
+      },
+      // sum of sales quantity against given date for items
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: 1,
+          waistages: "$waistagesQ",
+          Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$id",
+          date: { "$first": "$dateObj" },
+          name: { "$first": "$Itemname" },
+          unit: { "$first": "$countingUnit" },
+          wStock: { $sum: '$waistages' }
+        }
+      }
+
+    ]);
+    //parse object with desired keys
+    const parseObject = (data) => {
+      return {
+        _id: data._id,
+        name: data.name,
+        wStock: data.wStock || 0,
+        sStock: data.sStock || 0,
+        pStock: data.pStock || 0,
+        Remainings: data.pStock - (data.wStock + data.sStock)
+      };
+  
+  }
+  
+    //merge all arrays into one
+ var _result = [...waistages, ...sales, ...purchase];
+var output = {};
+_result.forEach((element) => {
+  if (!output[element._id]) {
+      output[element._id] = element;
+      if(element.wStock)
+      output[element._id].wStock = element.wStock;
+      else 
+      output[element._id].wStock = 0;
+      if(element.sStock)
+      output[element._id].sStock = element.sStock;
+      else 
+      output[element._id].sStock = 0;
+      if (element.pStock) 
+      output[element._id].pStock = element.pStock;
+      else 
+      output[element._id].pStock = 0;
+    //   output[element._id] = parseObject(output[element._id])
+  }
+  else {
+   
+    if(element.wStock)
+    output[element._id].wStock = element.wStock;
+    if(element.sStock)
+    output[element._id].sStock = element.sStock;
+    if (element.pStock) 
+    output[element._id].pStock = element.pStock;
+
+    // output[element._id].total = output[element._id].wStock ||  0 + output[element._id].sStock ||  0 + output[element._id].pStock ||  0;
+      output[element._id] = parseObject(output[element._id])
+  }
+});
+
+// console.log(Object.values(output));
+let finalResult = Object.values(output)
+    res.status(200).send({
       code: 200,
       message: 'Successful',
-      itemReport: itemReport,
-    });  }
-  else if (req.body.menu == 'Date')
-  {
-  let date = req.body.date;
-  itemReport = await Items.aggregate([
-    { $match : { isExpense : "false" } },
-    { $project: {  id: { $toString: "$_id" }, dateObj: { $toDate: "$timeStamp" }, Itemname: 1, countingUnit : 1} },
-          {
-           $project:
-           {
-             _id : 0,
-             id: 1,
-             dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-             Itemname: 1,
-             countingUnit: 1,
-           }
-         },
-         {
-          $match:
-          {
-            $and: [
-              { dateObj: date },
-            ]
-          }
-        },
-       {
-           $lookup:{
-               from: "purchases",    
-               localField: "id",   
-               foreignField: "item", 
-               as: "purchases"         
-           }
-       },
-       {
-           $lookup:{
-               from: "sales", 
-               localField: "id", 
-               foreignField: "item",
-               as: "sales"
-           }
-       },
+      report:finalResult
+      // waistages: waistages,
+      // sales: sales,
+      // purchase: purchase,
+      // _result: _result
+    });
+  }
+  else if (req.body.menu == 'Date') {
+    let date = req.body.date;
+    purchase = await Items.aggregate([
+      { $match: { isExpense: "false" } },
+      { $project: { id: { $toString: "$_id" }, Itemname: 1, countingUnit: 1 } },
       {
-           $lookup:{
-               from: "waistages", 
-               localField: "id", 
-               foreignField: "item",
-               as: "waistages"
-           }
-       },
-       {   
-           $project:{
-               _id : 0,
-               id: 1,
-               Itemname : 1,
-               countingUnit : 1,
-               salesQuantity : { $sum: "$sales.quantity"},
-               purchasesQuantity : { $sum: "$purchases.quantity"},
-               waistageQuntity: { $sum: "$waistages.quantity"},
-           } 
-       },
-           {   
-           $project:{
-               _id : 0,
-               id: 1,
-               Itemname : 1,
-               countingUnit : 1,
-               sales: "$salesQuantity",
-               purchases: "$purchasesQuantity",
-               waistages: "$waistageQuntity",
-               remainings: {$subtract:[ "$purchasesQuantity", { $add: [ "$salesQuantity", "$waistageQuntity" ] }] }
-           } 
-       }
-   ]);
-   res.status(200).send({
-    code: 200,
-    message: 'Successful',
-    itemReport: itemReport,
-  });
-}
+        $project:
+        {
+          _id: 0,
+          id: 1,
+          Itemname: 1,
+          countingUnit: 1,
+        }
+      },
+      // Join with user_info table
+      {
+        $lookup: {
+          from: "purchases",       // other table name
+          localField: "id",   // name of users table field
+          foreignField: "item", // name of userinfo table field
+          as: "purchases"         // alias for userinfo table
+        }
+      },
+      { $unwind: "$purchases" },
+
+      {
+        $project: {
+          _id: 0, id: 1, dateObj: { $toDate: "$purchases.timeStamp" },
+          purchaseQ: "$purchases.quantity", Itemname: 1, countingUnit: 1
+        }
+      },
+      //formate date and new documents
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
+          purchaseQ: "$purchaseQ", Itemname: 1, countingUnit: 1
+        }
+      },
+      // {
+      //   $match:
+      //   {
+      //     $and: [
+      //       { dateObj: { $gte: fromDate, $lte: toDate } },
+      //     ]
+      //   }
+      // },
+      {
+        $match:
+        {
+          $and: [
+            { dateObj: date },
+          ]
+        }
+      },
+      // sum of purchases quantity against given date for items
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: 1,
+          purchase: "$purchaseQ",
+          Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$id",
+          date: { "$first": "$dateObj" },
+          name: { "$first": "$Itemname" },
+          unit: { "$first": "$countingUnit" },
+          pStock: { $sum: '$purchase' }
+        }
+      }
+    ]);
+    //Sales for an item
+    sales = await Items.aggregate([
+      { $match: { isExpense: "false" } },
+      { $project: { id: { $toString: "$_id" }, Itemname: 1, countingUnit: 1 } },
+      {
+        $project:
+        {
+          _id: 0,
+          id: 1,
+          Itemname: 1,
+          countingUnit: 1,
+        }
+      },
+      // Join with user_info table
+      {
+        $lookup: {
+          from: "sales",       // other table name
+          localField: "id",   // name of users table field
+          foreignField: "item", // name of userinfo table field
+          as: "sales"         // alias for userinfo table
+        }
+      },
+      { $unwind: "$sales" },
+
+      {
+        $project: {
+          _id: 0, id: 1, dateObj: { $toDate: "$sales.timeStamp" },
+          salesQ: "$sales.quantity", Itemname: 1, countingUnit: 1
+        }
+      },
+      //formate date and new documents
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
+          salesQ: "$salesQ", Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $match:
+        {
+          $and: [
+            { dateObj: date },
+          ]
+        }
+      },
+      // sum of sales quantity against given date for items
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: 1,
+          sales: "$salesQ",
+          Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$id",
+          date: { "$first": "$dateObj" },
+          name: { "$first": "$Itemname" },
+          unit: { "$first": "$countingUnit" },
+          sStock: { $sum: '$sales' }
+        }
+      }
+    ]);
+    waistages = await Items.aggregate([
+      { $match: { isExpense: "false" } },
+      { $project: { id: { $toString: "$_id" }, Itemname: 1, countingUnit: 1 } },
+      {
+        $project:
+        {
+          _id: 0,
+          id: 1,
+          Itemname: 1,
+          countingUnit: 1,
+        }
+      },
+      // Join with user_info table
+      {
+        $lookup: {
+          from: "waistages",       // other table name
+          localField: "id",   // name of users table field
+          foreignField: "item", // name of userinfo table field
+          as: "waistages"         // alias for userinfo table
+        }
+      },
+      { $unwind: "$waistages" },
+
+      {
+        $project: {
+          _id: 0, id: 1, dateObj: { $toDate: "$waistages.timeStamp" },
+          waistagesQ: "$waistages.quantity", Itemname: 1, countingUnit: 1
+        }
+      },
+      //formate date and new documents
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
+          waistagesQ: "$waistagesQ", Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $match:
+        {
+          $and: [
+            { dateObj: date },
+          ]
+        }
+      },
+      // sum of sales quantity against given date for items
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          dateObj: 1,
+          waistages: "$waistagesQ",
+          Itemname: 1, countingUnit: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$id",
+          date: { "$first": "$dateObj" },
+          name: { "$first": "$Itemname" },
+          unit: { "$first": "$countingUnit" },
+          wStock: { $sum: '$waistages' }
+        }
+      }
+
+    ]);
+    //parse object with desired keys
+    const parseObject = (data) => {
+      return {
+        _id: data._id,
+        name: data.name,
+        wStock: data.wStock || 0,
+        sStock: data.sStock || 0,
+        pStock: data.pStock || 0,
+        Remainings: data.pStock - (data.wStock + data.sStock)
+      };
+  }
+  
+    //merge all arrays into one
+ var _result = [...waistages, ...sales, ...purchase];
+var output = {};
+_result.forEach((element) => {
+  if (!output[element._id]) {
+      output[element._id] = element;
+      if(element.wStock)
+      output[element._id].wStock = element.wStock;
+      else 
+      output[element._id].wStock = 0;
+      if(element.sStock)
+      output[element._id].sStock = element.sStock;
+      else 
+      output[element._id].sStock = 0;
+      if (element.pStock) 
+      output[element._id].pStock = element.pStock;
+      else 
+      output[element._id].pStock = 0;
+    //   output[element._id] = parseObject(output[element._id])
+  }
+  else {
+   
+    if(element.wStock)
+    output[element._id].wStock = element.wStock;
+    if(element.sStock)
+    output[element._id].sStock = element.sStock;
+    if (element.pStock) 
+    output[element._id].pStock = element.pStock;
+
+    // output[element._id].total = output[element._id].wStock ||  0 + output[element._id].sStock ||  0 + output[element._id].pStock ||  0;
+      output[element._id] = parseObject(output[element._id])
+  }
+});
+
+// console.log(Object.values(output));
+let finalResult = Object.values(output)
+    res.status(200).send({
+      code: 200,
+      message: 'Successful',
+      report:finalResult
+      // waistages: waistages,
+      // sales: sales,
+      // purchase: purchase,
+      // _result: _result
+    });
+  }
 };
 ReportController.getISaleReportRange = async (req, res) => {
   console.log('in item report')
@@ -538,12 +914,12 @@ ReportController.getISaleReportRange = async (req, res) => {
   } else if (req.body.menu == 'Date') {
     let date = req.body.date;
     paid = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" }, amount: 1,unpaid:1 } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, amount: 1, unpaid: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1
+          unpaid: 1, amount: 1
         }
       },
       {
@@ -577,7 +953,7 @@ ReportController.getISaleReportRange = async (req, res) => {
       },
       { $group: { _id: "$day", paid: { $sum: '$price' } } },
     ])
-    
+
     // unpaid = await Sales.aggregate([
     //   { $project: { dateObj: { $toDate: "$timeStamp" }, item: 1, quantity: 1, payment: 1, amount: 1 } },
     //   {
@@ -601,12 +977,12 @@ ReportController.getISaleReportRange = async (req, res) => {
     //   { $group: { _id: "$day", paid: { $sum: '$amount' } } },
     // ])
     oldUnpaidAmount = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" },unpaid:1, amount: 1 } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1
+          unpaid: 1, amount: 1
         }
       },
       {
@@ -617,18 +993,18 @@ ReportController.getISaleReportRange = async (req, res) => {
           ]
         }
       },
-      { $group: { _id: "$day", paid: { $sum: '$amount' } , unpaid: { $sum: '$unpaid' } } },
+      { $group: { _id: "$day", paid: { $sum: '$amount' }, unpaid: { $sum: '$unpaid' } } },
     ])
     totalUnpaid = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid:1, amount: 1 } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1
+          unpaid: 1, amount: 1
         }
       },
-      { $group: { _id: "$day", paid: { $sum: '$amount' } , unpaid: { $sum: '$unpaid' }} },
+      { $group: { _id: "$day", paid: { $sum: '$amount' }, unpaid: { $sum: '$unpaid' } } },
     ])
     // paidFromPayments = await Payments.aggregate([
     //   { $project: { dateObj: { $toDate: "$timeStamp" }, amount: 1 } },
@@ -649,16 +1025,16 @@ ReportController.getISaleReportRange = async (req, res) => {
     //   },
     //   { $group: { _id: "$day", paid: { $sum: '$amount' } } },
     // ])
-  
+
   } else if (req.body.menu == 'Buyer') {
     let buyerId = req.body.buyer;
     paid = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid:1, amount: 1, buyer: 1 } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1, buyer: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1, buyer: 1
+          unpaid: 1, amount: 1, buyer: 1
         }
       },
       {
@@ -695,35 +1071,35 @@ ReportController.getISaleReportRange = async (req, res) => {
     // ])
 
 
-  //   paidFromPayments = await Payments.aggregate([
-  //     { $project: { dateObj: { $toDate: "$timeStamp" }, amount: 1 , buyer: 1} },
-  //     {
-  //       $project:
-  //       {
-  //         amount: 1, buyer: 1
-  //       }
-  //     },
-  //     {
-  //       $match:
-  //       {
-  //         $and: [
-  //           { buyer: buyerId }
-  //         ]
-  //       }
-  //     },
-  //  { $group: { _id: "$day", paid: { $sum: '$amount' } } },
-  //   ])
+    //   paidFromPayments = await Payments.aggregate([
+    //     { $project: { dateObj: { $toDate: "$timeStamp" }, amount: 1 , buyer: 1} },
+    //     {
+    //       $project:
+    //       {
+    //         amount: 1, buyer: 1
+    //       }
+    //     },
+    //     {
+    //       $match:
+    //       {
+    //         $and: [
+    //           { buyer: buyerId }
+    //         ]
+    //       }
+    //     },
+    //  { $group: { _id: "$day", paid: { $sum: '$amount' } } },
+    //   ])
 
   } else if (req.body.menu == 'Date And Buyer') {
     let date = req.body.date;
     let buyerId = req.body.buyer;
     paid = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid:1, amount: 1,buyer:1 } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1, buyer: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1,buyer:1
+          unpaid: 1, amount: 1, buyer: 1
         }
       },
       {
@@ -751,7 +1127,7 @@ ReportController.getISaleReportRange = async (req, res) => {
       {
         $match:
         {
-          $and: [ { dateObj: date }
+          $and: [{ dateObj: date }
           ]
         }
       },
@@ -781,12 +1157,12 @@ ReportController.getISaleReportRange = async (req, res) => {
     //   { $group: { _id: "$day", paid: { $sum: '$amount' } } },
     // ])
     oldUnpaidAmount = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" },unpaid:1, amount: 1,buyer:1  } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1, buyer: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1,buyer:1 
+          unpaid: 1, amount: 1, buyer: 1
         }
       },
       {
@@ -801,12 +1177,12 @@ ReportController.getISaleReportRange = async (req, res) => {
       { $group: { _id: "$day", paid: { $sum: '$amount' }, unpaid: { $sum: '$unpaid' } } },
     ])
     totalUnpaid = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" },unpaid:1, amount: 1,buyer:1  } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1, buyer: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1,buyer:1 
+          unpaid: 1, amount: 1, buyer: 1
         }
       },
       {
@@ -844,12 +1220,12 @@ ReportController.getISaleReportRange = async (req, res) => {
     var toDate = req.body.end.split('T')[0];
     let buyerId = req.body.buyer;
     paid = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid:1, amount: 1,buyer:1 } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1, buyer: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1,buyer:1
+          unpaid: 1, amount: 1, buyer: 1
         }
       },
       {
@@ -908,12 +1284,12 @@ ReportController.getISaleReportRange = async (req, res) => {
     //   { $group: { _id: "$day", paid: { $sum: '$amount' } } },
     // ])
     oldUnpaidAmount = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" },unpaid:1, amount: 1,buyer:1 } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1, buyer: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1,buyer:1
+          unpaid: 1, amount: 1, buyer: 1
         }
       },
       {
@@ -928,12 +1304,12 @@ ReportController.getISaleReportRange = async (req, res) => {
       { $group: { _id: "$day", paid: { $sum: '$amount' }, unpaid: { $sum: '$unpaid' } } },
     ])
     totalUnpaid = await Payments.aggregate([
-      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid:1, amount: 1,buyer:1 } },
+      { $project: { dateObj: { $toDate: "$timeStamp" }, unpaid: 1, amount: 1, buyer: 1 } },
       {
         $project:
         {
           dateObj: { '$dateToString': { format: '%Y-%m-%d', date: '$dateObj' } },
-          unpaid:1, amount: 1,buyer:1
+          unpaid: 1, amount: 1, buyer: 1
         }
       },
       {
@@ -978,9 +1354,9 @@ ReportController.getISaleReportRange = async (req, res) => {
   //   },
   //   { $group: { _id: "$day", paid: { $sum: '$amount' } } },
   // ])
- // console.log(req.body);
+  // console.log(req.body);
 
- 
+
   // console.log('paid',paid[0].paid);
   // console.log('paid',paid[0].unpaid);
   // console.log('totalpaid',totalUnpaid[0].paid);
@@ -1086,8 +1462,8 @@ ReportController.getISaleReportRange = async (req, res) => {
     oldUnpaidAmount: oldUnpaidAmount,
     totalUnpaid: totalUnpaid,
     paidFromPayments: paidFromPayments,
-    totalPaidFromPayments:totalPaidFromPayments,
-    expensesAmount:expensesAmount
+    totalPaidFromPayments: totalPaidFromPayments,
+    expensesAmount: expensesAmount
     //saleList:saleList
   });
 
